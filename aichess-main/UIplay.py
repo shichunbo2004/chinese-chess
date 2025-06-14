@@ -47,7 +47,7 @@ else:
 # 初始化pygame
 pygame.init()
 pygame.mixer.init()
-pygame.mixer.music.load('bgm/yinzi.ogg')
+pygame.mixer.music.load('bgm/1.mp3')
 pygame.mixer.music.set_volume(0.03)
 pygame.mixer.music.play(loops=-1, start=0.0)
 
