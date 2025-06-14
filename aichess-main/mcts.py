@@ -187,10 +187,15 @@ class MCTSPlayer(object):
             self.mcts.update_with_move(move)
         else:
             # 使用默认的temp=1e-3，它几乎相当于选择具有最高概率的移动
-            move = np.random.choice(acts, p=probs)
+            move = np.random.choice(acts, p=probs) 
             # 重置根节点
             self.mcts.update_with_move(-1)
         if return_prob:
             return move, move_probs
         else:
             return move
+
+    # 新增：返回动作和概率分布
+    def get_action_with_prob(self, board, temp=1e-3):
+        move, move_probs = self.get_action(board, temp=temp, return_prob=1)
+        return move, move_probs
