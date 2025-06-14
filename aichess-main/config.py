@@ -1,7 +1,7 @@
 CONFIG = {
     'kill_action': 30,      #和棋回合数
     'dirichlet': 0.2,       # 国际象棋，0.3；日本将棋，0.15；围棋，0.03
-    'play_out': 1200,        # 每次移动的模拟次数
+    'play_out': 100,        # 每次移动的模拟次数
     'c_puct': 5,             # u的权重
     'buffer_size': 100000,   # 经验池大小
     'paddle_model_path': 'current_policy.model',      # paddle模型路径

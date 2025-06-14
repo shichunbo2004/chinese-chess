@@ -1,7 +1,10 @@
 import pygame
 import sys
 import copy
+import pickle
 from game import move_action2move_id, move_id2move_action, Game, Board
+import subprocess
+import os
 
 
 class Human:
@@ -112,6 +115,8 @@ def draw_selected_effect(surface, pos, radius=36, color=(80, 180, 255, 220)):
 
 start_i_j = None  # 在变量区初始化
 
+move_list = []  # 新增：保存每步move_id
+
 while True:
     # 填充背景
     screen.blit(bg_image, (0, 0))
@@ -208,31 +213,25 @@ while True:
     if player_in_turn.agent == 'HUMAN':
         draw_fire = True
         swicth_player = False
-        
         if len(move_action) == 4:
-            move = player_in_turn.get_action(move_action)  # 当前玩家代理拿到动作
-            # 新增：判断move是否合法
+            move = player_in_turn.get_action(move_action)
             if move != -1 and move in board.availables:
                 board.do_move(move)
+                move_list.append(move)  # 记录每步
                 swicth_player = True
                 move_action = ''
                 draw_fire = False
-                first_button = False  # 只有走子成功后才取消选中
+                first_button = False
             else:
                 move_action = ''
-                # first_button 不变
-                # draw_fire 不变
                 illegal_move_msg = "非法走法，请重新选择"
                 illegal_move_time = pygame.time.get_ticks()
 
     end, winner = board.game_end()
     if end:
-        # 绘制半透明黑色背景
         overlay = pygame.Surface((width, height), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 180))  # 半透明黑色
+        overlay.fill((0, 0, 0, 180))
         screen.blit(overlay, (0, 0))
-
-        # 设置结果文本
         font = pygame.font.SysFont("SimHei", 60, bold=True)
         if winner == 1:
             result_text = "游戏结束，红方获胜！"
@@ -240,24 +239,42 @@ while True:
             result_text = "游戏结束，黑方获胜！"
         else:
             result_text = "游戏结束，平局！"
-
-        # 渲染文本（黄色更醒目）
         text_surface = font.render(result_text, True, (255, 215, 0))
-        text_rect = text_surface.get_rect(center=(width // 2, height // 2))
-
-        # 可选：再加一行提示
-        tip_font = pygame.font.SysFont("SimHei", 36)
-        tip_surface = tip_font.render("请关闭窗口退出游戏", True, (255, 255, 255))
-        tip_rect = tip_surface.get_rect(center=(width // 2, height // 2 + 60))
-
+        text_rect = text_surface.get_rect(center=(width // 2, height // 2 - 40))
         screen.blit(text_surface, text_rect)
-        screen.blit(tip_surface, tip_rect)
+
+        # 保存棋谱
+        with open("last_game_moves.pkl", "wb") as f:
+            pickle.dump(move_list, f)
+
+        # 创建按钮
+        btn_font = pygame.font.SysFont("SimHei", 36, bold=True)
+        # 两个按钮一样大
+        review_btn_rect = pygame.Rect(width // 2 - 140, height // 2 + 20, 150, 60)
+        exit_btn_rect = pygame.Rect(width // 2 + 10, height // 2 + 20, 150, 60)
+
+        pygame.draw.rect(screen, (80, 180, 255), review_btn_rect, border_radius=12)
+        pygame.draw.rect(screen, (220, 80, 80), exit_btn_rect, border_radius=12)
+        review_text = btn_font.render("对局回放", True, (255, 255, 255))
+        exit_text = btn_font.render("退出游戏", True, (255, 255, 255))
+        screen.blit(review_text, review_text.get_rect(center=review_btn_rect.center))
+        screen.blit(exit_text, exit_text.get_rect(center=exit_btn_rect.center))
         pygame.display.update()
 
-        # 等待玩家关闭窗口
         waiting = True
         while waiting:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     waiting = False
-        break  # 跳出主循环，结束程序
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if review_btn_rect.collidepoint(event.pos):
+                        pygame.quit()
+                        subprocess.call([sys.executable, "review.py"])
+                        waiting = False
+                        break
+                    elif exit_btn_rect.collidepoint(event.pos):
+                        pygame.quit()
+                        if os.path.exists("last_game_moves.pkl"):
+                            os.remove("last_game_moves.pkl")
+                        sys.exit()
+        break

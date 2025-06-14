@@ -2,6 +2,7 @@ import pygame
 import sys
 import copy
 import time
+import pickle
 from game import move_action2move_id, move_id2move_action, Game, Board
 from mcts import MCTSPlayer
 from config import CONFIG
@@ -103,6 +104,8 @@ start_i_j = None
 illegal_move_msg = ""
 illegal_move_time = 0
 
+move_list = []  # 新增：保存每步move_id
+
 while True:
     # 绘制棋盘和棋子
     screen.blit(bg_image, (0, 0))
@@ -191,6 +194,7 @@ while True:
         pygame.display.update()
         move = player_in_turn.get_action(board)
         board.do_move(move)
+        move_list.append(move)  # 记录AI每步
         swicth_player = True
         draw_fire = False
         first_button = False
@@ -202,6 +206,7 @@ while True:
             move = player_in_turn.get_action(move_action)
             if move != -1 and move in board.availables:
                 board.do_move(move)
+                move_list.append(move)  # 记录人每步
                 swicth_player = True
                 move_action = ''
                 draw_fire = False
@@ -231,6 +236,9 @@ while True:
         screen.blit(text_surface, text_rect)
         screen.blit(tip_surface, tip_rect)
         pygame.display.update()
+        # 保存棋谱
+        with open("last_game_moves.pkl", "wb") as f:
+            pickle.dump(move_list, f)
         waiting = True
         while waiting:
             for event in pygame.event.get():
