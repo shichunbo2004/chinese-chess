@@ -185,7 +185,11 @@ def get_legal_moves(state_deque, current_player_color):
     """
 
     state_list = state_deque[-1]
-    old_state_list = state_deque[-4]
+
+    if len(state_deque) < 4:
+        old_state_list = state_deque[0]  # 或者用最早的状态
+    else:
+        old_state_list = state_deque[-4]
 
     moves = []  # 用来存放所有合法的走子方法
     face_to_face = False  # 将军面对面

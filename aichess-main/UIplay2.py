@@ -109,6 +109,16 @@ illegal_move_time = 0
 
 move_list = []  # 新增：保存每步move_id
 
+def regret():
+    current_player = board.get_current_player_id()
+    if current_player != 1:
+        return
+    for _ in range(2):
+        if len(board.state_deque) > 1:
+            board.state_deque.pop()
+        if move_list:
+            move_list.pop()
+
 while True:
     # 绘制棋盘和棋子
     screen.blit(bg_image, (0, 0))
@@ -156,13 +166,30 @@ while True:
         else:
             illegal_move_msg = ""
 
+    # --- 悔棋按钮（左侧居中） ---
+    regret_btn_rect = pygame.Rect(10, height // 2 - 30, 100, 36)
+    regret_btn_surf = pygame.Surface((100, 36), pygame.SRCALPHA)
+    # 按钮高亮仅红方行动时
+    if board.get_current_player_id() == 1:
+        regret_btn_surf.fill((220, 80, 80, 220))
+    else:
+        regret_btn_surf.fill((120, 120, 120, 120))
+    screen.blit(regret_btn_surf, regret_btn_rect.topleft)
+    btn_font = pygame.font.SysFont("SimHei", 22, bold=True)
+    regret_text = btn_font.render("红方悔棋", True, (255,255,255))
+    screen.blit(regret_text, regret_text.get_rect(center=regret_btn_rect.center))
+
     pygame.display.update()
     clock.tick(60)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if regret_btn_rect.collidepoint(event.pos):
+                regret()
+                continue
+            # 只有不是悔棋按钮才处理棋盘点击
             mouse_x, mouse_y = event.pos
             if not first_button:
                 # 只允许点击己方棋子才选中

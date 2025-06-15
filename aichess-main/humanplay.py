@@ -179,9 +179,8 @@ while True:
 
     # 假设棋盘区域为 width x height，棋盘坐标参数不变
 
-    # 红方悔棋按钮（左侧居中）
+    # 定义按钮rect
     red_undo_btn_rect = pygame.Rect(10, height // 2 - 30, 100, 36)
-    # 黑方悔棋按钮（右侧居中）
     black_undo_btn_rect = pygame.Rect(width - 110, height // 2 - 30, 100, 36)
 
     # 半透明按钮
@@ -196,11 +195,12 @@ while True:
 
     red_btn_surf = pygame.Surface((100, 36), pygame.SRCALPHA)
     red_btn_surf.fill(red_btn_color)
-    screen.blit(red_btn_surf, (10, height // 2 - 30))
+    screen.blit(red_btn_surf, red_undo_btn_rect.topleft)
     black_btn_surf = pygame.Surface((100, 36), pygame.SRCALPHA)
     black_btn_surf.fill(black_btn_color)
-    screen.blit(black_btn_surf, (width - 110, height // 2 - 30))
+    screen.blit(black_btn_surf, black_undo_btn_rect.topleft)
 
+    # 绘制文字
     btn_font = pygame.font.SysFont("SimHei", 22, bold=True)
     red_text = btn_font.render("红方悔棋", True, (255,255,255))
     black_text = btn_font.render("黑方悔棋", True, (255,255,255))
