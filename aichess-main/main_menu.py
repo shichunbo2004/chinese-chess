@@ -20,8 +20,8 @@ title_color = (200, 40, 40)
 
 buttons = [
     {"text": "人人对战", "rect": pygame.Rect(250, 220, 200, 60), "file": "humanplay.py"},
-    {"text": "人机对战", "rect": pygame.Rect(250, 320, 200, 60), "file": "UIplay2.py"},
-    {"text": "机机对战", "rect": pygame.Rect(250, 420, 200, 60), "file": "collect.py"},
+    {"text": "人机对战", "rect": pygame.Rect(250, 320, 200, 60), "file": "UIplay.py"},
+    {"text": "机机对战", "rect": pygame.Rect(250, 420, 200, 60), "file": "eve.py"},
 ]
 
 def draw_menu():
