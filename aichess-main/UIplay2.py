@@ -3,6 +3,9 @@ import sys
 import copy
 import time
 import pickle
+import subprocess
+import os
+
 from game import move_action2move_id, move_id2move_action, Game, Board
 from mcts import MCTSPlayer
 from config import CONFIG
@@ -229,19 +232,41 @@ while True:
         else:
             result_text = "游戏结束，平局！"
         text_surface = font.render(result_text, True, (255, 215, 0))
-        text_rect = text_surface.get_rect(center=(width // 2, height // 2))
-        tip_font = pygame.font.SysFont("SimHei", 36)
-        tip_surface = tip_font.render("请关闭窗口退出游戏", True, (255, 255, 255))
-        tip_rect = tip_surface.get_rect(center=(width // 2, height // 2 + 60))
+        text_rect = text_surface.get_rect(center=(width // 2, height // 2 - 40))
         screen.blit(text_surface, text_rect)
-        screen.blit(tip_surface, tip_rect)
-        pygame.display.update()
+
         # 保存棋谱
         with open("last_game_moves.pkl", "wb") as f:
             pickle.dump(move_list, f)
+
+        # 创建按钮
+        btn_font = pygame.font.SysFont("SimHei", 36, bold=True)
+        # 两个按钮一样大
+        review_btn_rect = pygame.Rect(width // 2 - 140, height // 2 + 20, 150, 60)
+        exit_btn_rect = pygame.Rect(width // 2 + 10, height // 2 + 20, 150, 60)
+
+        pygame.draw.rect(screen, (80, 180, 255), review_btn_rect, border_radius=12)
+        pygame.draw.rect(screen, (220, 80, 80), exit_btn_rect, border_radius=12)
+        review_text = btn_font.render("对局回放", True, (255, 255, 255))
+        exit_text = btn_font.render("退出游戏", True, (255, 255, 255))
+        screen.blit(review_text, review_text.get_rect(center=review_btn_rect.center))
+        screen.blit(exit_text, exit_text.get_rect(center=exit_btn_rect.center))
+        pygame.display.update()
+
         waiting = True
         while waiting:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     waiting = False
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if review_btn_rect.collidepoint(event.pos):
+                        pygame.quit()
+                        subprocess.call([sys.executable, "review.py"])
+                        waiting = False
+                        break
+                    elif exit_btn_rect.collidepoint(event.pos):
+                        pygame.quit()
+                        if os.path.exists("last_game_moves.pkl"):
+                            os.remove("last_game_moves.pkl")
+                        sys.exit()
         break

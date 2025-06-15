@@ -105,7 +105,15 @@ first_button = False
 
 illegal_move_msg = ""
 illegal_move_time = 0
-
+def regret(side):
+    current_player = board.get_current_player_id()
+    if (side == "red" and current_player != 1) or (side == "black" and current_player != 2):
+        return
+    for _ in range(2):
+        if len(board.state_deque) > 1:
+            board.state_deque.pop()
+        if move_list:
+            move_list.pop()
 # 新增高亮圆环函数（蓝色高亮，亮度高）
 def draw_selected_effect(surface, pos, radius=36, color=(80, 180, 255, 220)):
     """在指定位置绘制半透明高亮蓝色圆环"""
@@ -168,6 +176,44 @@ while True:
             screen.blit(tip_surface, tip_rect)
         else:
             illegal_move_msg = ""
+
+    # 假设棋盘区域为 width x height，棋盘坐标参数不变
+
+    # 红方悔棋按钮（左侧居中）
+    red_undo_btn_rect = pygame.Rect(10, height // 2 - 30, 100, 36)
+    # 黑方悔棋按钮（右侧居中）
+    black_undo_btn_rect = pygame.Rect(width - 110, height // 2 - 30, 100, 36)
+
+    # 半透明按钮
+    red_btn_color = (220, 80, 80, 180)
+    black_btn_color = (30, 30, 30, 180)
+    if current_player == 1:
+        red_btn_color = (220, 80, 80, 220)
+        black_btn_color = (120, 120, 120, 120)
+    else:
+        red_btn_color = (120, 120, 120, 120)
+        black_btn_color = (30, 30, 30, 220)
+
+    red_btn_surf = pygame.Surface((100, 36), pygame.SRCALPHA)
+    red_btn_surf.fill(red_btn_color)
+    screen.blit(red_btn_surf, (10, height // 2 - 30))
+    black_btn_surf = pygame.Surface((100, 36), pygame.SRCALPHA)
+    black_btn_surf.fill(black_btn_color)
+    screen.blit(black_btn_surf, (width - 110, height // 2 - 30))
+
+    btn_font = pygame.font.SysFont("SimHei", 22, bold=True)
+    red_text = btn_font.render("红方悔棋", True, (255,255,255))
+    black_text = btn_font.render("黑方悔棋", True, (255,255,255))
+    screen.blit(red_text, red_text.get_rect(center=red_undo_btn_rect.center))
+    screen.blit(black_text, black_text.get_rect(center=black_undo_btn_rect.center))
+
+    # 检测点击
+    for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if red_undo_btn_rect.collidepoint(event.pos):
+                regret("red")
+            elif black_undo_btn_rect.collidepoint(event.pos):
+                regret("black")
 
     # 更新界面
     pygame.display.update()
